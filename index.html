@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>25:00 — Tomato Focus</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Google Fonts: Inter & JetBrains Mono for tabular numbers -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        tomato: {
+                            50: '#fff1f0',
+                            100: '#ffe0de',
+                            200: '#ffc7c3',
+                            300: '#ffa099',
+                            400: '#ff6b61',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#b91c1c',
+                            800: '#991b1b',
+                            900: '#7f1d1d',
+                        },
+                        leaf: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                        },
+                        rest: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans min-h-screen flex flex-col justify-between transition-colors duration-500 selection:bg-tomato-200 selection:text-tomato-900" id="app-body">
+
+    <!-- Top Navigation Bar -->
+    <header class="w-full max-w-2xl mx-auto px-4 pt-6 pb-2 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+            <!-- Mini Tomato Brand Icon -->
+            <div class="w-9 h-9 rounded-2xl bg-tomato-500 flex items-center justify-center shadow-sm shadow-tomato-500/30 relative">
+                <svg class="w-6 h-6 text-white" viewBox="0 0 32 32" fill="none">
+                    <!-- Leaf -->
+                    <path d="M16 9C16 9 13.5 5 10 6C12 8.5 15 9.5 16 9Z" fill="#4ade80"/>
+                    <path d="M16 9C16 9 18.5 5 22 6C20 8.5 17 9.5 16 9Z" fill="#22c55e"/>
+                    <path d="M16 9V4.5" stroke="#16a34a" stroke-width="2" stroke-linecap="round"/>
+                    <!-- Tomato Body -->
+                    <circle cx="16" cy="18" r="9.5" fill="currentColor"/>
+                    <path d="M11.5 14.5C12.5 13.2 14 12.8 15 12.8" stroke="#ffe0de" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-lg font-extrabold tracking-tight text-stone-900 leading-none">Tomato Focus</h1>
+                <p class="text-xs text-stone-500 font-medium mt-0.5">Pomodoro Rhythm</p>
+            </div>
+        </div>
+
+        <!-- Right Controls: Wake Lock Status, Sound Toggle & Settings -->
+        <div class="flex items-center gap-2">
+            <!-- Screen Wake Lock Status Badge -->
+            <div id="wakelock-badge" title="Screen Wake Lock Status"
+                class="px-2.5 py-2 rounded-xl bg-white border border-stone-200/80 text-stone-400 text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-all duration-300 select-none">
+                <!-- Sun / Awake Icon -->
+                <svg id="icon-wakelock-on" class="w-4 h-4 hidden text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+                <!-- Moon / Auto-Lock Icon -->
+                <svg id="icon-wakelock-off" class="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                </svg>
+                <span id="wakelock-text" class="hidden sm:inline">Auto-Lock</span>
+            </div>
+
+            <!-- Sound Mute/Unmute Button -->
+            <button id="mute-btn" type="button" title="Toggle Sound" aria-label="Toggle Sound"
+                class="p-2.5 rounded-xl bg-white border border-stone-200/80 text-stone-600 hover:text-stone-900 hover:bg-stone-100 active:scale-95 transition-all shadow-xs">
+                <!-- Volume On Icon -->
+                <svg id="icon-sound-on" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                </svg>
+                <!-- Volume Off Icon (Hidden by default) -->
+                <svg id="icon-sound-off" class="w-5 h-5 hidden text-stone-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
+                </svg>
+            </button>
+
+            <!-- Settings Modal Trigger -->
+            <button id="settings-btn" type="button" title="Timer Settings" aria-label="Timer Settings"
+                class="p-2.5 rounded-xl bg-white border border-stone-200/80 text-stone-600 hover:text-stone-900 hover:bg-stone-100 active:scale-95 transition-all shadow-xs flex items-center gap-1.5 text-sm font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <span class="hidden sm:inline">Settings</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Timer Card -->
+    <main class="w-full max-w-lg mx-auto px-4 my-auto py-4">
+        <div class="bg-white rounded-3xl shadow-xl shadow-stone-200/60 border border-stone-200/70 p-6 sm:p-8 flex flex-col items-center relative overflow-hidden">
+            
+            <!-- Toast Notification Banner (Replaces alert) -->
+            <div id="toast-banner" class="w-full mb-4 px-4 py-2.5 rounded-2xl bg-stone-900 text-white text-sm font-medium flex items-center justify-between gap-2 transform -translate-y-2 opacity-0 pointer-events-none transition-all duration-300 absolute top-4 left-4 right-4 max-w-[calc(100%-2rem)] z-20 shadow-lg">
+                <span id="toast-message">Session complete!</span>
+                <button id="toast-close" type="button" class="text-stone-400 hover:text-white p-1 rounded-lg">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Mode Switcher Pills -->
+            <div class="w-full bg-stone-100 p-1.5 rounded-2xl grid grid-cols-3 gap-1 mb-8" role="tablist" aria-label="Timer Modes">
+                <button id="tab-work" type="button" role="tab" aria-selected="true" data-mode="work"
+                    class="mode-tab py-2.5 px-2 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 bg-white text-tomato-600 shadow-xs">
+                    Focus
+                </button>
+                <button id="tab-short" type="button" role="tab" aria-selected="false" data-mode="short"
+                    class="mode-tab py-2.5 px-2 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-stone-600 hover:text-stone-900">
+                    Short Break
+                </button>
+                <button id="tab-long" type="button" role="tab" aria-selected="false" data-mode="long"
+                    class="mode-tab py-2.5 px-2 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-stone-600 hover:text-stone-900">
+                    Long Break
+                </button>
+            </div>
+
+            <!-- Visual Tomato SVG Dial & Countdown Ring -->
+            <div class="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center my-2 select-none">
+                <!-- Decorative Tomato Calyx (Leaves & Stem) at top of dial -->
+                <svg class="w-24 h-12 absolute -top-5 z-10 pointer-events-none drop-shadow-xs transition-transform duration-500" id="tomato-leaves" viewBox="0 0 120 60" fill="none">
+                    <!-- Center Stem -->
+                    <path d="M60 32C60 22 63 12 67 8" stroke="#15803d" stroke-width="5" stroke-linecap="round"/>
+                    <!-- Left Leaf -->
+                    <path d="M60 34C48 22 26 22 18 32C30 36 46 38 60 34Z" fill="#22c55e" stroke="#16a34a" stroke-width="2" stroke-linejoin="round"/>
+                    <!-- Right Leaf -->
+                    <path d="M60 34C72 22 94 22 102 32C90 36 74 38 60 34Z" fill="#22c55e" stroke="#16a34a" stroke-width="2" stroke-linejoin="round"/>
+                    <!-- Front Center-Left Leaf -->
+                    <path d="M60 34C50 32 36 40 34 48C45 46 54 41 60 34Z" fill="#4ade80" stroke="#16a34a" stroke-width="2" stroke-linejoin="round"/>
+                    <!-- Front Center-Right Leaf -->
+                    <path d="M60 34C70 32 84 40 86 48C75 46 66 41 60 34Z" fill="#4ade80" stroke="#16a34a" stroke-width="2" stroke-linejoin="round"/>
+                </svg>
+
+                <!-- Soft Radial Tomato Glow Background -->
+                <div id="dial-bg" class="w-56 h-56 sm:w-64 sm:h-64 rounded-full bg-tomato-50/90 border border-tomato-100 transition-colors duration-500 flex items-center justify-center relative shadow-inner">
+                    <!-- Subtle Gloss Highlight on top-left like a ripe tomato -->
+                    <div class="w-12 h-6 rounded-full bg-white/60 -rotate-35 absolute top-7 left-9 pointer-events-none blur-[1px]"></div>
+                </div>
+
+                <!-- Circular SVG Progress Ring -->
+                <svg class="w-full h-full -rotate-90 transform absolute inset-0" viewBox="0 0 260 260">
+                    <!-- Track Circle -->
+                    <circle cx="130" cy="130" r="114" fill="transparent" stroke="#f5f5f4" stroke-width="12"/>
+                    <!-- Active Progress Circle -->
+                    <circle id="progress-ring" cx="130" cy="130" r="114" fill="transparent"
+                        stroke="#ef4444" stroke-width="12" stroke-linecap="round"
+                        stroke-dasharray="716.28" stroke-dashoffset="0"
+                        class="transition-all duration-300 ease-out"/>
+                </svg>
+
+                <!-- Center Time Readout -->
+                <div class="absolute inset-0 flex flex-col items-center justify-center text-center z-10">
+                    <span id="status-badge" class="text-xs font-bold uppercase tracking-widest text-tomato-600 mb-1 transition-colors">
+                        Ready to Focus
+                    </span>
+                    <div id="timer-display" class="font-mono text-5xl sm:text-6xl font-bold tracking-tight text-stone-900 tabular-nums">
+                        25:00
+                    </div>
+                    <span id="next-up-label" class="text-xs text-stone-400 font-medium mt-2">
+                        Next: 5m Short Break
+                    </span>
+                </div>
+            </div>
+
+            <!-- Primary Controls: Start/Pause, Reset & Skip -->
+            <div class="flex items-center justify-center gap-3 w-full mt-8">
+                <button id="start-pause-btn" type="button"
+                    class="flex-1 max-w-[210px] py-3.5 px-6 rounded-2xl bg-tomato-500 hover:bg-tomato-600 active:scale-[0.98] text-white font-bold text-base sm:text-lg shadow-lg shadow-tomato-500/30 transition-all flex items-center justify-center gap-2.5 cursor-pointer">
+                    <!-- Play Icon -->
+                    <svg id="icon-play" class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    <!-- Pause Icon -->
+                    <svg id="icon-pause" class="w-5 h-5 fill-current hidden" viewBox="0 0 24 24">
+                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                    </svg>
+                    <span id="start-pause-text">Start Focus</span>
+                </button>
+
+                <button id="reset-btn" type="button" title="Reset Timer" aria-label="Reset Timer"
+                    class="p-3.5 rounded-2xl bg-stone-100 hover:bg-stone-200/80 active:scale-95 text-stone-700 font-semibold transition-all cursor-pointer flex items-center justify-center">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                </button>
+
+                <button id="skip-btn" type="button" title="Skip to Next Session" aria-label="Skip to Next Session"
+                    class="p-3.5 rounded-2xl bg-stone-100 hover:bg-stone-200/80 active:scale-95 text-stone-700 font-semibold transition-all cursor-pointer flex items-center justify-center">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Completed Tomatoes Counter -->
+            <div class="w-full mt-8 pt-6 border-t border-stone-100 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-stone-400">Harvested Tomatoes</span>
+                    <span id="session-count-badge" class="px-2 py-0.5 rounded-full bg-tomato-100 text-tomato-700 text-xs font-bold">0</span>
+                </div>
+                
+                <!-- Visual Tomato Basket Icons -->
+                <div id="tomato-basket" class="flex items-center gap-1.5 flex-wrap justify-end">
+                    <span class="text-xs text-stone-400 italic" id="empty-basket-text">Complete a focus session to harvest!</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Hint -->
+    <footer class="w-full max-w-2xl mx-auto px-4 py-4 text-center text-xs text-stone-400">
+        <span>Tip: Press <kbd class="px-1.5 py-0.5 rounded-md bg-stone-200/70 text-stone-600 font-mono text-[11px]">Space</kbd> to start/pause or <kbd class="px-1.5 py-0.5 rounded-md bg-stone-200/70 text-stone-600 font-mono text-[11px]">R</kbd> to reset.</span>
+    </footer>
+
+    <!-- Settings Modal Overlay -->
+    <div id="settings-modal" class="fixed inset-0 bg-stone-900/40 backdrop-blur-xs z-50 hidden items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-stone-200 transform transition-all" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <div class="flex items-center justify-between pb-4 border-b border-stone-100">
+                <h2 id="modal-title" class="text-lg font-bold text-stone-900 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-tomato-500"></span>
+                    Timer Settings
+                </h2>
+                <button id="close-modal-btn" type="button" class="p-1.5 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="settings-form" class="mt-5 space-y-5">
+                <!-- Duration Inputs -->
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-stone-400 mb-3">Durations (Minutes)</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="bg-stone-50 p-3 rounded-2xl border border-stone-200/80">
+                            <label for="input-work" class="block text-xs font-semibold text-tomato-600 mb-1">Focus</label>
+                            <input id="input-work" type="number" min="1" max="120" value="25" required
+                                class="w-full bg-white border border-stone-200 rounded-xl px-2.5 py-1.5 text-base font-mono font-bold text-stone-800 focus:outline-none focus:ring-2 focus:ring-tomato-500">
+                        </div>
+                        <div class="bg-stone-50 p-3 rounded-2xl border border-stone-200/80">
+                            <label for="input-short" class="block text-xs font-semibold text-leaf-600 mb-1">Short Break</label>
+                            <input id="input-short" type="number" min="1" max="60" value="5" required
+                                class="w-full bg-white border border-stone-200 rounded-xl px-2.5 py-1.5 text-base font-mono font-bold text-stone-800 focus:outline-none focus:ring-2 focus:ring-leaf-500">
+                        </div>
+                        <div class="bg-stone-50 p-3 rounded-2xl border border-stone-200/80">
+                            <label for="input-long" class="block text-xs font-semibold text-rest-600 mb-1">Long Break</label>
+                            <input id="input-long" type="number" min="1" max="90" value="15" required
+                                class="w-full bg-white border border-stone-200 rounded-xl px-2.5 py-1.5 text-base font-mono font-bold text-stone-800 focus:outline-none focus:ring-2 focus:ring-rest-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Auto-Start Toggles (Checked ON by default) -->
+                <div class="space-y-3 pt-2 border-t border-stone-100">
+                    <label class="flex items-center justify-between cursor-pointer py-1">
+                        <div>
+                            <span class="text-sm font-semibold text-stone-800 block">Auto-start Breaks</span>
+                            <span class="text-xs text-stone-500">Automatically start rest countdown after focus</span>
+                        </div>
+                        <input id="input-auto-break" type="checkbox" checked class="w-5 h-5 rounded-md accent-tomato-500 cursor-pointer">
+                    </label>
+
+                    <label class="flex items-center justify-between cursor-pointer py-1">
+                        <div>
+                            <span class="text-sm font-semibold text-stone-800 block">Auto-start Focus</span>
+                            <span class="text-xs text-stone-500">Automatically start next tomato after rest</span>
+                        </div>
+                        <input id="input-auto-work" type="checkbox" checked class="w-5 h-5 rounded-md accent-tomato-500 cursor-pointer">
+                    </label>
+
+                    <div class="flex items-center justify-between py-1">
+                        <div>
+                            <span class="text-sm font-semibold text-stone-800 block">Long Break Interval</span>
+                            <span class="text-xs text-stone-500">Tomatoes before a long rest</span>
+                        </div>
+                        <input id="input-long-interval" type="number" min="2" max="10" value="4" required
+                            class="w-16 bg-stone-50 border border-stone-200 rounded-xl px-2.5 py-1 text-center font-mono font-bold text-stone-800 focus:outline-none focus:ring-2 focus:ring-tomato-500">
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-stone-100">
+                    <button id="reset-defaults-btn" type="button" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-stone-500 hover:text-stone-800 hover:bg-stone-100 transition-colors mr-auto">
+                        Restore Defaults
+                    </button>
+                    <button id="cancel-settings-btn" type="button" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-stone-600 hover:bg-stone-100 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-tomato-500 hover:bg-tomato-600 text-white shadow-md shadow-tomato-500/20 transition-all cursor-pointer">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Tomato Focus — Pomodoro Timer Application
+         * Self-contained state management, Screen Wake Lock API, Web Audio API synthesizer, and SVG ring animation.
+         */
+        (function () {
+            // --- Configuration & State ---
+            const STORAGE_KEY = 'tomato_focus_settings_v2';
+            const DEFAULT_SETTINGS = {
+                work: 25,
+                short: 5,
+                long: 15,
+                autoBreak: true,
+                autoWork: true,
+                longInterval: 4
+            };
+
+            let settings = loadSettings();
+            let currentMode = 'work'; // 'work' | 'short' | 'long'
+            let timeRemaining = settings.work * 60;
+            let totalDuration = settings.work * 60;
+            let isRunning = false;
+            let timerInterval = null;
+            let completedTomatoes = 0;
+            let isMuted = false;
+            let audioCtx = null;
+            let toastTimeout = null;
+            let wakeLock = null;
+
+            // --- DOM Elements ---
+            const appBody = document.getElementById('app-body');
+            const timerDisplay = document.getElementById('timer-display');
+            const statusBadge = document.getElementById('status-badge');
+            const nextUpLabel = document.getElementById('next-up-label');
+            const progressRing = document.getElementById('progress-ring');
+            const dialBg = document.getElementById('dial-bg');
+            const tomatoLeaves = document.getElementById('tomato-leaves');
+
+            const startPauseBtn = document.getElementById('start-pause-btn');
+            const startPauseText = document.getElementById('start-pause-text');
+            const iconPlay = document.getElementById('icon-play');
+            const iconPause = document.getElementById('icon-pause');
+            const resetBtn = document.getElementById('reset-btn');
+            const skipBtn = document.getElementById('skip-btn');
+
+            const modeTabs = document.querySelectorAll('.mode-tab');
+            const wakelockBadge = document.getElementById('wakelock-badge');
+            const wakelockText = document.getElementById('wakelock-text');
+            const iconWakelockOn = document.getElementById('icon-wakelock-on');
+            const iconWakelockOff = document.getElementById('icon-wakelock-off');
+            const muteBtn = document.getElementById('mute-btn');
+            const iconSoundOn = document.getElementById('icon-sound-on');
+            const iconSoundOff = document.getElementById('icon-sound-off');
+
+            const sessionCountBadge = document.getElementById('session-count-badge');
+            const tomatoBasket = document.getElementById('tomato-basket');
+            const emptyBasketText = document.getElementById('empty-basket-text');
+
+            // Modal Elements
+            const settingsBtn = document.getElementById('settings-btn');
+            const settingsModal = document.getElementById('settings-modal');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const cancelSettingsBtn = document.getElementById('cancel-settings-btn');
+            const resetDefaultsBtn = document.getElementById('reset-defaults-btn');
+            const settingsForm = document.getElementById('settings-form');
+
+            const inputWork = document.getElementById('input-work');
+            const inputShort = document.getElementById('input-short');
+            const inputLong = document.getElementById('input-long');
+            const inputAutoBreak = document.getElementById('input-auto-break');
+            const inputAutoWork = document.getElementById('input-auto-work');
+            const inputLongInterval = document.getElementById('input-long-interval');
+
+            // Toast Elements
+            const toastBanner = document.getElementById('toast-banner');
+            const toastMessage = document.getElementById('toast-message');
+            const toastClose = document.getElementById('toast-close');
+
+            // Progress ring geometry (r = 114 -> 2 * PI * 114 ≈ 716.28)
+            const RING_CIRCUMFERENCE = 2 * Math.PI * 114;
+            progressRing.style.strokeDasharray = `${RING_CIRCUMFERENCE}`;
+
+            // --- Initialization ---
+            function init() {
+                syncInputsWithSettings();
+                applyModeTheme(currentMode);
+                updateDisplay();
+                attachEventListeners();
+            }
+
+            // --- LocalStorage Helpers ---
+            function loadSettings() {
+                try {
+                    const saved = localStorage.getItem(STORAGE_KEY);
+                    if (saved) {
+                        return { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
+                    }
+                } catch (e) {
+                    console.warn('Could not load settings from storage:', e);
+                }
+                return { ...DEFAULT_SETTINGS };
+            }
+
+            function saveSettingsToStorage() {
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+                } catch (e) {
+                    console.warn('Could not save settings to storage:', e);
+                }
+            }
+
+            // --- Web Audio API Chime Synthesizer ---
+            function playChime(type = 'complete') {
+                if (isMuted) return;
+                try {
+                    if (!audioCtx) {
+                        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                        audioCtx = new AudioContextClass();
+                    }
+                    if (audioCtx.state === 'suspended') {
+                        audioCtx.resume();
+                    }
+
+                    const now = audioCtx.currentTime;
+                    // Pleasant harmonic bell notes (C5, E5, G5, C6)
+                    const notes = type === 'complete'
+                        ? [523.25, 659.25, 783.99, 1046.50]
+                        : [440, 554.37];
+
+                    notes.forEach((freq, idx) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.14);
+
+                        gain.gain.setValueAtTime(0.001, now + idx * 0.14);
+                        gain.gain.exponentialRampToValueAtTime(0.22, now + idx * 0.14 + 0.03);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.14 + 0.9);
+
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+
+                        osc.start(now + idx * 0.14);
+                        osc.stop(now + idx * 0.14 + 0.95);
+                    });
+                } catch (err) {
+                    console.warn('Web Audio playback failed:', err);
+                }
+            }
+
+            // --- Screen Wake Lock API ---
+            function updateWakeLockUI(isActive) {
+                if (isActive) {
+                    wakelockBadge.className = 'px-2.5 py-2 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-700 text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-all duration-300 select-none';
+                    iconWakelockOn.classList.remove('hidden');
+                    iconWakelockOff.classList.add('hidden');
+                    wakelockText.textContent = 'Screen Awake';
+                } else {
+                    wakelockBadge.className = 'px-2.5 py-2 rounded-xl bg-white border border-stone-200/80 text-stone-400 text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-all duration-300 select-none';
+                    iconWakelockOn.classList.add('hidden');
+                    iconWakelockOff.classList.remove('hidden');
+                    wakelockText.textContent = 'Auto-Lock';
+                }
+            }
+
+            async function requestWakeLock() {
+                if ('wakeLock' in navigator) {
+                    try {
+                        if (wakeLock !== null) return;
+                        wakeLock = await navigator.wakeLock.request('screen');
+                        updateWakeLockUI(true);
+
+                        wakeLock.addEventListener('release', () => {
+                            wakeLock = null;
+                            updateWakeLockUI(false);
+                        });
+                    } catch (err) {
+                        console.warn(`Wake Lock request failed: ${err.name}, ${err.message}`);
+                        wakeLock = null;
+                        updateWakeLockUI(false);
+                    }
+                }
+            }
+
+            async function releaseWakeLock() {
+                if (wakeLock !== null) {
+                    try {
+                        await wakeLock.release();
+                    } catch (err) {
+                        console.warn(`Wake Lock release failed: ${err.message}`);
+                    } finally {
+                        wakeLock = null;
+                        updateWakeLockUI(false);
+                    }
+                } else {
+                    updateWakeLockUI(false);
+                }
+            }
+
+            // --- Timer Logic ---
+            function startTimer() {
+                if (isRunning) return;
+                // Unlock audio context on user interaction
+                if (!audioCtx && !isMuted) {
+                    try {
+                        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                        audioCtx = new AudioContextClass();
+                    } catch (e) {}
+                }
+
+                // Keep mobile screen awake while timer runs (Start, Resume, or Auto-start)
+                requestWakeLock();
+
+                isRunning = true;
+                updateControlsUI();
+
+                // Use drift-resistant timestamp tracking
+                let lastTick = Date.now();
+                timerInterval = setInterval(() => {
+                    const now = Date.now();
+                    const elapsedSeconds = Math.floor((now - lastTick) / 1000);
+
+                    if (elapsedSeconds >= 1) {
+                        timeRemaining = Math.max(0, timeRemaining - elapsedSeconds);
+                        lastTick += elapsedSeconds * 1000;
+                        updateDisplay();
+
+                        if (timeRemaining <= 0) {
+                            handleSessionComplete();
+                        }
+                    }
+                }, 200);
+            }
+
+            function pauseTimer() {
+                if (!isRunning) return;
+                isRunning = false;
+                clearInterval(timerInterval);
+                timerInterval = null;
+                releaseWakeLock();
+                updateControlsUI();
+                updateDisplay();
+            }
+
+            function resetTimer() {
+                pauseTimer();
+                releaseWakeLock();
+                totalDuration = settings[currentMode] * 60;
+                timeRemaining = totalDuration;
+                updateDisplay();
+            }
+
+            function switchMode(newMode, autoStart = false) {
+                pauseTimer();
+                currentMode = newMode;
+                totalDuration = settings[currentMode] * 60;
+                timeRemaining = totalDuration;
+                applyModeTheme(currentMode);
+                updateDisplay();
+
+                if (autoStart) {
+                    startTimer();
+                }
+            }
+
+            function handleSessionComplete() {
+                pauseTimer();
+                playChime('complete');
+
+                if (currentMode === 'work') {
+                    completedTomatoes += 1;
+                    renderTomatoBasket();
+
+                    const isLongBreakDue = completedTomatoes % settings.longInterval === 0;
+                    const nextMode = isLongBreakDue ? 'long' : 'short';
+                    const message = isLongBreakDue
+                        ? `🎉 ${completedTomatoes} tomatoes harvested! Enjoy a ${settings.long}m long break.`
+                        : `🍅 Focus complete! Time for a ${settings.short}m short break.`;
+
+                    showToast(message);
+                    switchMode(nextMode, settings.autoBreak);
+                } else {
+                    showToast(`✨ Break finished! Ready for your next ${settings.work}m focus session.`);
+                    switchMode('work', settings.autoWork);
+                }
+            }
+
+            // --- UI & Theme Updates ---
+            function applyModeTheme(mode) {
+                // Update tab active styles
+                modeTabs.forEach(tab => {
+                    const isActive = tab.dataset.mode === mode;
+                    tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                    tab.className = 'mode-tab py-2.5 px-2 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ';
+
+                    if (isActive) {
+                        if (mode === 'work') {
+                            tab.className += 'bg-white text-tomato-600 shadow-xs';
+                        } else if (mode === 'short') {
+                            tab.className += 'bg-white text-leaf-600 shadow-xs';
+                        } else {
+                            tab.className += 'bg-white text-rest-600 shadow-xs';
+                        }
+                    } else {
+                        tab.className += 'text-stone-600 hover:text-stone-900';
+                    }
+                });
+
+                // Update dial colors, background tint, and CTA button
+                if (mode === 'work') {
+                    appBody.className = 'bg-tomato-50/40 text-stone-800 font-sans min-h-screen flex flex-col justify-between transition-colors duration-500 selection:bg-tomato-200 selection:text-tomato-900';
+                    dialBg.className = 'w-56 h-56 sm:w-64 sm:h-64 rounded-full bg-tomato-50/90 border border-tomato-100 transition-colors duration-500 flex items-center justify-center relative shadow-inner';
+                    progressRing.setAttribute('stroke', '#ef4444');
+                    statusBadge.className = 'text-xs font-bold uppercase tracking-widest text-tomato-600 mb-1 transition-colors';
+                    startPauseBtn.className = 'flex-1 max-w-[210px] py-3.5 px-6 rounded-2xl bg-tomato-500 hover:bg-tomato-600 active:scale-[0.98] text-white font-bold text-base sm:text-lg shadow-lg shadow-tomato-500/30 transition-all flex items-center justify-center gap-2.5 cursor-pointer';
+                    tomatoLeaves.style.transform = 'scale(1) rotate(0deg)';
+                } else if (mode === 'short') {
+                    appBody.className = 'bg-leaf-50/50 text-stone-800 font-sans min-h-screen flex flex-col justify-between transition-colors duration-500 selection:bg-leaf-100 selection:text-leaf-700';
+                    dialBg.className = 'w-56 h-56 sm:w-64 sm:h-64 rounded-full bg-leaf-50/90 border border-leaf-100 transition-colors duration-500 flex items-center justify-center relative shadow-inner';
+                    progressRing.setAttribute('stroke', '#22c55e');
+                    statusBadge.className = 'text-xs font-bold uppercase tracking-widest text-leaf-600 mb-1 transition-colors';
+                    startPauseBtn.className = 'flex-1 max-w-[210px] py-3.5 px-6 rounded-2xl bg-leaf-600 hover:bg-leaf-700 active:scale-[0.98] text-white font-bold text-base sm:text-lg shadow-lg shadow-leaf-600/30 transition-all flex items-center justify-center gap-2.5 cursor-pointer';
+                    tomatoLeaves.style.transform = 'scale(1.06) rotate(-4deg)';
+                } else {
+                    appBody.className = 'bg-rest-50/60 text-stone-800 font-sans min-h-screen flex flex-col justify-between transition-colors duration-500 selection:bg-rest-100 selection:text-rest-600';
+                    dialBg.className = 'w-56 h-56 sm:w-64 sm:h-64 rounded-full bg-rest-50/90 border border-rest-100 transition-colors duration-500 flex items-center justify-center relative shadow-inner';
+                    progressRing.setAttribute('stroke', '#38bdf8');
+                    statusBadge.className = 'text-xs font-bold uppercase tracking-widest text-rest-600 mb-1 transition-colors';
+                    startPauseBtn.className = 'flex-1 max-w-[210px] py-3.5 px-6 rounded-2xl bg-rest-500 hover:bg-rest-600 active:scale-[0.98] text-white font-bold text-base sm:text-lg shadow-lg shadow-rest-500/30 transition-all flex items-center justify-center gap-2.5 cursor-pointer';
+                    tomatoLeaves.style.transform = 'scale(1.06) rotate(4deg)';
+                }
+
+                updateControlsUI();
+            }
+
+            function updateControlsUI() {
+                if (isRunning) {
+                    iconPlay.classList.add('hidden');
+                    iconPause.classList.remove('hidden');
+                    startPauseText.textContent = 'Pause';
+                } else {
+                    iconPlay.classList.remove('hidden');
+                    iconPause.classList.add('hidden');
+                    if (currentMode === 'work') {
+                        startPauseText.textContent = timeRemaining < totalDuration ? 'Resume Focus' : 'Start Focus';
+                    } else {
+                        startPauseText.textContent = timeRemaining < totalDuration ? 'Resume Break' : 'Start Break';
+                    }
+                }
+            }
+
+            function updateDisplay() {
+                const formatted = formatTime(timeRemaining);
+                timerDisplay.textContent = formatted;
+
+                // Update dynamic browser tab title
+                const modeLabel = currentMode === 'work' ? 'Focus' : (currentMode === 'short' ? 'Short Break' : 'Long Break');
+                document.title = `${formatted} — ${modeLabel} | Tomato Focus`;
+
+                // Update status text
+                if (isRunning) {
+                    statusBadge.textContent = currentMode === 'work' ? 'Focusing...' : 'Resting...';
+                } else {
+                    statusBadge.textContent = timeRemaining < totalDuration
+                        ? 'Paused'
+                        : (currentMode === 'work' ? 'Ready to Focus' : 'Time to Recharge');
+                }
+
+                // Update Next Up hint
+                if (currentMode === 'work') {
+                    const nextIsLong = (completedTomatoes + 1) % settings.longInterval === 0;
+                    nextUpLabel.textContent = nextIsLong
+                        ? `Next: ${settings.long}m Long Break`
+                        : `Next: ${settings.short}m Short Break`;
+                } else {
+                    nextUpLabel.textContent = `Next: ${settings.work}m Focus`;
+                }
+
+                // Update SVG progress ring offset
+                const progress = totalDuration > 0 ? timeRemaining / totalDuration : 0;
+                const offset = RING_CIRCUMFERENCE * (1 - progress);
+                progressRing.style.strokeDashoffset = `${offset}`;
+            }
+
+            function formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            }
+
+            function renderTomatoBasket() {
+                sessionCountBadge.textContent = completedTomatoes;
+                if (completedTomatoes === 0) return;
+
+                if (emptyBasketText) {
+                    emptyBasketText.remove();
+                }
+
+                // Add a crisp SVG tomato icon for the newly completed session (cap display at 12 icons + counter)
+                if (completedTomatoes <= 12) {
+                    const tomatoIcon = document.createElement('span');
+                    tomatoIcon.className = 'inline-flex items-center justify-center w-6 h-6 rounded-full bg-tomato-50 border border-tomato-200/80 shadow-2xs animate-bounce';
+                    tomatoIcon.style.animationIterationCount = '1';
+                    tomatoIcon.title = `Tomato #${completedTomatoes}`;
+                    tomatoIcon.innerHTML = `
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 6C12 6 10 3 7.5 4C9 6 11 6.5 12 6Z" fill="#22c55e"/>
+                            <path d="M12 6C12 6 14 3 16.5 4C15 6 13 6.5 12 6Z" fill="#16a34a"/>
+                            <circle cx="12" cy="13.5" r="7.5" fill="#ef4444"/>
+                            <path d="M8.5 11C9.2 10 10.3 9.7 11 9.7" stroke="#ffe0de" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    `;
+                    tomatoBasket.appendChild(tomatoIcon);
+                }
+            }
+
+            // --- Toast Notification ---
+            function showToast(msg) {
+                toastMessage.textContent = msg;
+                toastBanner.classList.remove('opacity-0', '-translate-y-2', 'pointer-events-none');
+                toastBanner.classList.add('opacity-100', 'translate-y-0');
+
+                if (toastTimeout) clearTimeout(toastTimeout);
+                toastTimeout = setTimeout(hideToast, 6000);
+            }
+
+            function hideToast() {
+                toastBanner.classList.add('opacity-0', '-translate-y-2', 'pointer-events-none');
+                toastBanner.classList.remove('opacity-100', 'translate-y-0');
+            }
+
+            // --- Settings Modal Handlers ---
+            function syncInputsWithSettings() {
+                inputWork.value = settings.work;
+                inputShort.value = settings.short;
+                inputLong.value = settings.long;
+                inputAutoBreak.checked = settings.autoBreak;
+                inputAutoWork.checked = settings.autoWork;
+                inputLongInterval.value = settings.longInterval;
+            }
+
+            function openSettingsModal() {
+                syncInputsWithSettings();
+                settingsModal.classList.remove('hidden');
+                settingsModal.classList.add('flex');
+            }
+
+            function closeSettingsModal() {
+                settingsModal.classList.add('hidden');
+                settingsModal.classList.remove('flex');
+            }
+
+            // --- Event Listeners ---
+            function attachEventListeners() {
+                startPauseBtn.addEventListener('click', () => {
+                    if (isRunning) {
+                        pauseTimer();
+                    } else {
+                        startTimer();
+                    }
+                });
+
+                resetBtn.addEventListener('click', () => {
+                    resetTimer();
+                });
+
+                skipBtn.addEventListener('click', () => {
+                    handleSessionComplete();
+                });
+
+                modeTabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        const targetMode = tab.dataset.mode;
+                        if (targetMode !== currentMode) {
+                            switchMode(targetMode, false);
+                        }
+                    });
+                });
+
+                muteBtn.addEventListener('click', () => {
+                    isMuted = !isMuted;
+                    if (isMuted) {
+                        iconSoundOn.classList.add('hidden');
+                        iconSoundOff.classList.remove('hidden');
+                    } else {
+                        iconSoundOff.classList.add('hidden');
+                        iconSoundOn.classList.remove('hidden');
+                        playChime('preview');
+                    }
+                });
+
+                toastClose.addEventListener('click', hideToast);
+
+                // Modal open/close
+                settingsBtn.addEventListener('click', openSettingsModal);
+                closeModalBtn.addEventListener('click', closeSettingsModal);
+                cancelSettingsBtn.addEventListener('click', closeSettingsModal);
+
+                settingsModal.addEventListener('click', (e) => {
+                    if (e.target === settingsModal) {
+                        closeSettingsModal();
+                    }
+                });
+
+                resetDefaultsBtn.addEventListener('click', () => {
+                    settings = { ...DEFAULT_SETTINGS };
+                    syncInputsWithSettings();
+                });
+
+                settingsForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const workVal = Math.min(120, Math.max(1, parseInt(inputWork.value, 10) || 25));
+                    const shortVal = Math.min(60, Math.max(1, parseInt(inputShort.value, 10) || 5));
+                    const longVal = Math.min(90, Math.max(1, parseInt(inputLong.value, 10) || 15));
+                    const intervalVal = Math.min(10, Math.max(2, parseInt(inputLongInterval.value, 10) || 4));
+
+                    settings = {
+                        work: workVal,
+                        short: shortVal,
+                        long: longVal,
+                        autoBreak: inputAutoBreak.checked,
+                        autoWork: inputAutoWork.checked,
+                        longInterval: intervalVal
+                    };
+
+                    saveSettingsToStorage();
+                    closeSettingsModal();
+                    resetTimer();
+                    showToast('Settings updated!');
+                });
+
+                // Keyboard Shortcuts (Space = Start/Pause, R = Reset, Escape = Close Modal)
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && !settingsModal.classList.contains('hidden')) {
+                        closeSettingsModal();
+                        return;
+                    }
+                    // Ignore shortcuts when typing inside inputs
+                    if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+                    if (e.code === 'Space') {
+                        e.preventDefault();
+                        isRunning ? pauseTimer() : startTimer();
+                    } else if (e.key.toLowerCase() === 'r') {
+                        resetTimer();
+                    }
+                });
+
+                // Re-acquire screen wake lock when returning to the tab while timer is running
+                document.addEventListener('visibilitychange', async () => {
+                    if (document.visibilityState === 'visible' && isRunning) {
+                        await requestWakeLock();
+                    }
+                });
+            }
+
+            // Boot application
+            init();
+        })();
+    </script>
+</body>
+</html>
