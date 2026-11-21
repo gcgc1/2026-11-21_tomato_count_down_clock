@@ -3,6 +3,8 @@ Tomato (Pomodoro) Countdown Clock webpage
 
 https://gcgc1.github.io/2026-11-21_tomato_count_down_clock/
 
+![Alt text describing the image](images/tomato_QR.jpg)
+
 -----
 by Gemini
 
