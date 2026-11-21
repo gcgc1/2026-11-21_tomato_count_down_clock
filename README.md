@@ -1,4 +1,6 @@
-# 2026-11-21_tomato_count_down_clock
+
+# Tomato count down clock <br>*(with mobile screen will always on when running)*
+
 Tomato (Pomodoro) Countdown Clock webpage
 
 https://gcgc1.github.io/2026-11-21_tomato_count_down_clock/
