@@ -4,3 +4,19 @@ Tomato (Pomodoro) Countdown Clock webpage
 by Gemini
 https://share.gemini.google/ThLtVENi3S84
 
+
+
+
+
+===============
+2. Best for Permanent Hosting: GitHub Pages
+If you want a reliable, permanent site that you can easily update later, GitHub Pages is the industry standard for static sites.
+
+Create a free account at GitHub.com and create a New Repository (make sure it is set to Public).
+
+Click Add file > Upload files and upload your index.html and other assets.
+
+Go to the repository's Settings tab, click Pages on the left sidebar, select the main branch under "Source", and click Save.
+
+Your site will be live within a minute or two at yourusername.github.io/repository-name.
+===============
