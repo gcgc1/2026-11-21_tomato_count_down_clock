@@ -7,6 +7,9 @@ https://gcgc1.github.io/2026-11-21_tomato_count_down_clock/
 
 ![Alt text describing the image](images/tomato_QR.jpg)
 
+![Alt text describing the image](images/screen_shot.jpg)
+
+
 -----
 by Gemini
 
